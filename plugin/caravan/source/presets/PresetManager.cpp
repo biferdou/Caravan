@@ -11,6 +11,7 @@ namespace Caravan
 
     void PresetManager::initializePresets()
     {
+        // Make sure this initialization is formatted correctly - the error was likely here
         desertPresets = {
             // Oasis - Characterized by moderate saturation, strong presence, and subtle width
             {"Oasis", 0.68f, true, 0.55f, 0.72f, 0.42f},
@@ -39,7 +40,7 @@ namespace Caravan
 
     void PresetManager::applyPreset(int presetIndex)
     {
-        if (presetIndex >= 0 && presetIndex < desertPresets.size())
+        if (presetIndex >= 0 && presetIndex < static_cast<int>(desertPresets.size()))
         {
             const auto &preset = desertPresets[presetIndex];
 
@@ -55,7 +56,7 @@ namespace Caravan
 
     std::string PresetManager::getPresetName(int index) const
     {
-        if (index >= 0 && index < desertPresets.size())
+        if (index >= 0 && index < static_cast<int>(desertPresets.size()))
         {
             return desertPresets[index].name;
         }
@@ -63,4 +64,3 @@ namespace Caravan
     }
 
 }
-=
