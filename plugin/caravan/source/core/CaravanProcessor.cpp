@@ -57,6 +57,8 @@ namespace Caravan
         // Update Vocal EQ settings
         vocalEQ.updateSettings(tuneMode, airValue, deEsserValue);
 
+        juce::ignoreUnused(widthValue);
+
         // Set input/output gain to prevent clipping
         // Adding a slight output gain compensation based on drive amount to maintain consistent levels
         inputGain.setGainLinear(0.8f);
