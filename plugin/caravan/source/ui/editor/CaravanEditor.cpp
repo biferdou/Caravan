@@ -4,7 +4,6 @@
 
 namespace Caravan
 {
-
     CaravanEditor::CaravanEditor(CaravanProcessor &p)
         : AudioProcessorEditor(&p), processor(p)
     {
@@ -13,7 +12,6 @@ namespace Caravan
         lookAndFeel = std::make_unique<CaravanLookAndFeel>();
         setLookAndFeel(lookAndFeel.get());
 
-        // Configure sliders with labels
         configureSlider(dustDriveSlider, true);
         dustDriveSlider.setName("Dust Drive");
 
@@ -26,15 +24,17 @@ namespace Caravan
         configureSlider(deEsserSlider);
         configureLabel(deEsserLabel, "De-Esser");
 
-        // Configure Tune Mode toggle
-        tuneModeButton.setButtonText("Tune Mode");
+        tuneModeButton.setButtonText("");
         tuneModeButton.setLookAndFeel(lookAndFeel.get());
         tuneModeButton.setColour(juce::ToggleButton::textColourId, juce::Colours::white);
 
-        // Add components to editor
+        configureLabel(tuneModeLabel, "Tune Mode");
+        configureLabel(dustDriveLabel, "Dust Drive");
+
         addAndMakeVisible(dustDriveSlider);
         addAndMakeVisible(dustDriveLabel);
         addAndMakeVisible(tuneModeButton);
+        addAndMakeVisible(tuneModeLabel);
         addAndMakeVisible(widthSlider);
         addAndMakeVisible(widthLabel);
         addAndMakeVisible(airSlider);
@@ -42,7 +42,18 @@ namespace Caravan
         addAndMakeVisible(deEsserSlider);
         addAndMakeVisible(deEsserLabel);
 
-        // Create parameter attachments
+        titleLabel.setText("CARAVAN", juce::dontSendNotification);
+        titleLabel.setFont(fontManager.getFont(48.0f));
+        titleLabel.setJustificationType(juce::Justification::centred);
+        titleLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+        addAndMakeVisible(titleLabel);
+
+        versionLabel.setText("alpha v1.0.1", juce::dontSendNotification);
+        versionLabel.setFont(fontManager.getFont(14.0f));
+        versionLabel.setJustificationType(juce::Justification::bottomLeft);
+        versionLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+        addAndMakeVisible(versionLabel);
+
         sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
             processor.apvts, "dustDrive", dustDriveSlider));
         sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
@@ -55,7 +66,6 @@ namespace Caravan
         tuneModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
             processor.apvts, "tuneMode", tuneModeButton);
 
-        // Add value change listeners to update parameters
         dustDriveSlider.onValueChange = [this]()
         { updateParameters(); };
         widthSlider.onValueChange = [this]()
@@ -67,30 +77,9 @@ namespace Caravan
         tuneModeButton.onClick = [this]()
         { updateParameters(); };
 
-        // Configure preset box with desert names
-        setupPresetBox();
-        addAndMakeVisible(presetBox);
-
-        // Create title and version labels with custom font
-        titleLabel.setText("CARAVAN", juce::dontSendNotification);
-        titleLabel.setFont(fontManager.getFont(48.0f));
-        titleLabel.setJustificationType(juce::Justification::centred);
-        titleLabel.setColour(juce::Label::textColourId, juce::Colours::white);
-        addAndMakeVisible(titleLabel);
-
-        // Apply custom font to labels
-        dustDriveLabel.setFont(fontManager.getFont(18.0f));
-        widthLabel.setFont(fontManager.getFont(18.0f));
-        airLabel.setFont(fontManager.getFont(18.0f));
-        deEsserLabel.setFont(fontManager.getFont(18.0f));
-
-        // Set the custom font in the LookAndFeel
-        lookAndFeel->setFont(fontManager.getFont(15.0f));
-
-        // Initialize OpenGL context
+        setupPresetCarousel();
         openGLContext = std::make_unique<CaravanOpenGLContext>();
-
-        startTimer(50); // Start timer for animations
+        startTimer(50);
     }
 
     CaravanEditor::~CaravanEditor()
@@ -98,14 +87,8 @@ namespace Caravan
         setLookAndFeel(nullptr);
     }
 
-    void CaravanEditor::updateParameters()
-    {
-        repaint();
-    }
-
     void CaravanEditor::paint(juce::Graphics &g)
     {
-        // Draw background image from binary resources
         auto backgroundImage = juce::ImageCache::getFromMemory(
             BinaryData::background_png, BinaryData::background_pngSize);
 
@@ -115,7 +98,6 @@ namespace Caravan
         }
         else
         {
-            // Fallback if image not found
             g.fillAll(juce::Colour(0xFF1A1A1A));
         }
     }
@@ -123,68 +105,106 @@ namespace Caravan
     void CaravanEditor::resized()
     {
         auto bounds = getLocalBounds().reduced(20);
+        auto headerBounds = bounds.removeFromTop(80);
+        titleLabel.setBounds(headerBounds.removeFromTop(50));
 
-        // Header section with title and version
-        auto headerBounds = bounds.removeFromTop(80);           // Reduced from 100
-        titleLabel.setBounds(headerBounds.removeFromTop(50));   // Reduced from 60
-        versionLabel.setBounds(headerBounds.removeFromTop(25)); // Reduced from 30
+        auto mainArea = bounds;
 
-        // Preset box on the right top corner
-        presetBox.setBounds(bounds.getRight() - 180, 30, 180, 30);
-
-        // Main area for controls
-        auto mainArea = bounds.reduced(5);
-
-        // Calculate dimensions for dust drive section - still larger but fits 800x600
-        int dustDriveSize = 320; // Increased size but not double (fits better in 800x600)
-
-        // Center the dust drive knob horizontally
+        int dustDriveSize = 320;
         int horizontalCenter = mainArea.getCentreX();
-        int topPosition = 100; // Position from top
+        int topPosition = 100;
 
-        // Create a centered area for the Dust Drive knob
         auto dustDriveArea = juce::Rectangle<int>(
             horizontalCenter - dustDriveSize / 2,
             topPosition,
             dustDriveSize,
             dustDriveSize);
 
-        // Position Dust Drive label above the knob
-        dustDriveLabel.setBounds(dustDriveArea.getX(), dustDriveArea.getY() - 25, dustDriveSize, 25);
-
-        // Position the main knob
+        dustDriveLabel.setBounds(dustDriveArea.getX(), dustDriveArea.getY() - 30, dustDriveSize, 25);
         dustDriveSlider.setBounds(dustDriveArea);
 
-        // Calculate the area for secondary controls - place them in a symmetrical row below
-        const int bottomRowY = dustDriveArea.getBottom() + 20; // Gap after main knob
-        const int smallKnobSize = 90;                          // Size for smaller knobs (reduced)
-        const int spacing = 20;                                // Space between knobs (reduced)
+        int buttonWidth = 80;
+        int buttonHeight = 30;
+        int tuneModeX = getWidth() - buttonWidth - 40;
 
-        // Calculate total width needed for all 4 controls
-        int totalControlsWidth = 4 * smallKnobSize + 3 * spacing;
+        tuneModeLabel.setBounds(
+            tuneModeX,
+            dustDriveArea.getCentreY() - buttonHeight / 2 - 25,
+            buttonWidth,
+            20);
 
-        // Starting X position to center the row
-        int startX = horizontalCenter - totalControlsWidth / 2;
+        tuneModeButton.setBounds(
+            tuneModeX,
+            dustDriveArea.getCentreY() - buttonHeight / 2,
+            buttonWidth,
+            buttonHeight);
 
-        // Position Tune Mode button
-        tuneModeButton.setBounds(startX, bottomRowY, smallKnobSize, 30);
+        int secondaryKnobSize = 80;
+        int secondaryKnobY = dustDriveArea.getBottom() + 30;
+        int secondaryKnobSpacing = 40;
+        int totalWidth = 3 * secondaryKnobSize + 2 * secondaryKnobSpacing;
+        int secondaryKnobStartX = horizontalCenter - totalWidth / 2;
 
-        // Position Width control
-        widthLabel.setBounds(startX + smallKnobSize + spacing, bottomRowY - 20, smallKnobSize, 20);
-        widthSlider.setBounds(startX + smallKnobSize + spacing, bottomRowY, smallKnobSize, smallKnobSize);
+        widthLabel.setBounds(
+            secondaryKnobStartX,
+            secondaryKnobY - 25,
+            secondaryKnobSize,
+            20);
+        widthSlider.setBounds(
+            secondaryKnobStartX,
+            secondaryKnobY,
+            secondaryKnobSize,
+            secondaryKnobSize);
 
-        // Position Air control
-        airLabel.setBounds(startX + 2 * (smallKnobSize + spacing), bottomRowY - 20, smallKnobSize, 20);
-        airSlider.setBounds(startX + 2 * (smallKnobSize + spacing), bottomRowY, smallKnobSize, smallKnobSize);
+        airLabel.setBounds(
+            secondaryKnobStartX + secondaryKnobSize + secondaryKnobSpacing,
+            secondaryKnobY - 25,
+            secondaryKnobSize,
+            20);
+        airSlider.setBounds(
+            secondaryKnobStartX + secondaryKnobSize + secondaryKnobSpacing,
+            secondaryKnobY,
+            secondaryKnobSize,
+            secondaryKnobSize);
 
-        // Position De-Esser control
-        deEsserLabel.setBounds(startX + 3 * (smallKnobSize + spacing), bottomRowY - 20, smallKnobSize, 20);
-        deEsserSlider.setBounds(startX + 3 * (smallKnobSize + spacing), bottomRowY, smallKnobSize, smallKnobSize);
+        deEsserLabel.setBounds(
+            secondaryKnobStartX + 2 * (secondaryKnobSize + secondaryKnobSpacing),
+            secondaryKnobY - 25,
+            secondaryKnobSize,
+            20);
+        deEsserSlider.setBounds(
+            secondaryKnobStartX + 2 * (secondaryKnobSize + secondaryKnobSpacing),
+            secondaryKnobY,
+            secondaryKnobSize,
+            secondaryKnobSize);
+
+        int carouselHeight = 40;
+        int carouselButtonWidth = 40;
+        int carouselY = getHeight() - carouselHeight - 10;
+
+        prevPresetButton.setBounds(
+            horizontalCenter - 120,
+            carouselY,
+            carouselButtonWidth,
+            carouselHeight);
+        presetNameLabel.setBounds(
+            horizontalCenter - 70,
+            carouselY,
+            140,
+            carouselHeight);
+        nextPresetButton.setBounds(
+            horizontalCenter + 80,
+            carouselY,
+            carouselButtonWidth,
+            carouselHeight);
+
+        versionLabel.setBounds(20, getHeight() - 30, 150, 25);
     }
+
     void CaravanEditor::configureSlider(juce::Slider &slider, bool isMainDrive)
     {
         slider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
-        slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 90, 20);
+        slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
         slider.setLookAndFeel(lookAndFeel.get());
 
         if (isMainDrive)
@@ -197,9 +217,6 @@ namespace Caravan
             slider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::orange.darker());
             slider.setColour(juce::Slider::thumbColourId, juce::Colours::orange.darker());
         }
-
-        slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
-        slider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     }
 
     void CaravanEditor::configureLabel(juce::Label &label, const juce::String &text)
@@ -210,71 +227,53 @@ namespace Caravan
         label.setColour(juce::Label::textColourId, juce::Colours::white);
     }
 
-    void CaravanEditor::setupPresetBox()
+    void CaravanEditor::setupPresetCarousel()
     {
-        // Clear any existing items first
-        presetBox.clear();
+        presetNameLabel.setText("Select Preset", juce::dontSendNotification);
+        presetNameLabel.setFont(fontManager.getFont(18.0f));
+        presetNameLabel.setJustificationType(juce::Justification::centred);
+        presetNameLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+        addAndMakeVisible(presetNameLabel);
 
-        // Set up styling
-        presetBox.setColour(juce::ComboBox::backgroundColourId, juce::Colours::darkgrey);
-        presetBox.setColour(juce::ComboBox::textColourId, juce::Colours::white);
-        presetBox.setColour(juce::ComboBox::arrowColourId, juce::Colours::orange);
+        prevPresetButton.setButtonText("<");
+        prevPresetButton.setColour(juce::TextButton::buttonColourId, juce::Colours::darkgrey);
+        prevPresetButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::orange.darker());
+        prevPresetButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+        prevPresetButton.onClick = [this]()
+        { cyclePreset(-1); };
+        addAndMakeVisible(prevPresetButton);
 
-        // Add a default item
-        presetBox.addItem("Select Preset", 1);
-
-        // Add all the preset names
-        presetBox.addItem("Oasis", 2);
-        presetBox.addItem("Sandstorm", 3);
-        presetBox.addItem("Mirage", 4);
-        presetBox.addItem("Dunes", 5);
-        presetBox.addItem("Sahara", 6);
-        presetBox.addItem("Sunset", 7);
-        presetBox.addItem("Pristine", 8);
-        presetBox.addItem("Nomad", 9);
-
-        // Set up the callback - make sure you're using a lambda that captures 'this'
-        presetBox.onChange = [this]()
-        { handlePresetChange(); };
-
-        // Set to first item
-        presetBox.setSelectedItemIndex(0);
+        nextPresetButton.setButtonText(">");
+        nextPresetButton.setColour(juce::TextButton::buttonColourId, juce::Colours::darkgrey);
+        nextPresetButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::orange.darker());
+        nextPresetButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+        nextPresetButton.onClick = [this]()
+        { cyclePreset(1); };
+        addAndMakeVisible(nextPresetButton);
     }
 
-    void CaravanEditor::handlePresetChange()
+    void CaravanEditor::cyclePreset(int direction)
     {
-        // Get the selected index, accounting for the fact that indices are zero-based
-        // but IDs start from 1
-        int selectedId = presetBox.getSelectedId();
+        const int numPresets = 8;
+        currentPresetIndex = (currentPresetIndex + direction + numPresets) % numPresets;
 
-        // Only apply preset if an actual preset is selected (not the "Select Preset" option)
-        if (selectedId > 1)
-        {
-            // Convert from combo box ID to preset index (subtract 2)
-            int presetIndex = selectedId - 2;
+        processor.applyPreset(currentPresetIndex);
 
-            // Debug output
-            juce::Logger::writeToLog("Applying preset: " + juce::String(presetIndex));
+        const std::string presetName = processor.getPresetName(currentPresetIndex);
+        presetNameLabel.setText(presetName, juce::dontSendNotification);
 
-            // Apply the preset to the processor
-            processor.applyPreset(presetIndex);
-
-            // Force a UI update of all parameters
-            updateAllParameters();
-        }
+        updateAllParameters();
     }
 
-    // Add this method to update all UI elements when a preset is selected
+    void CaravanEditor::updateParameters()
+    {
+        repaint();
+    }
+
     void CaravanEditor::updateAllParameters()
     {
-        // The SliderAttachments should automatically update the sliders,
-        // but we can force a refresh of other UI elements
-
-        // Update toggle buttons
         bool tuneMode = processor.apvts.getRawParameterValue("tuneMode")->load() > 0.5f;
         tuneModeButton.setToggleState(tuneMode, juce::dontSendNotification);
-
-        // Force a repaint of the UI
         repaint();
     }
 
