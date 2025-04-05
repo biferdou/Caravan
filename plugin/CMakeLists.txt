@@ -12,3 +12,39 @@ juce_add_plugin (${PROJECT_NAME}
     FORMATS VST3
     PRODUCT_NAME "Caravan"
 )
+
+target_sources(${PROJECT_NAME}
+    PRIVATE
+        source/PluginProcessor.cpp
+        source/PluginEditor.cpp
+)
+
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        include
+)
+
+target_link_libraries(${PROJECT_NAME} 
+    PRIVATE
+        juce::juce_audio_utils
+    PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags
+        juce::juce_recommended_warning_flags
+)
+
+target_compile_definitions(${PROJECT_NAME} 
+    PRIVATE
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0
+        JUCE_VST3_CAN_REPLACE_VST2=0
+)
+
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
+if(MSVC)
+target_compile_definitions(${PROJECT_NAME} 
+    PRIVATE 
+        _CRT_SECURE_NO_WARNINGS
+)
+endif()
