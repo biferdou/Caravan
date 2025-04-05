@@ -13,14 +13,23 @@ juce_add_plugin (${PROJECT_NAME}
     PRODUCT_NAME "Caravan"
 )
 
+# Define source files
 target_sources(${PROJECT_NAME}
     PRIVATE
-        source/CaravanProcessor.cpp
-        source/CaravanEditor.cpp
+        source/core/AudioParameters.cpp
+        source/core/CaravanProcessor.cpp
+        source/effects/DustDriveSaturator.cpp
+        source/effects/StereoWidthProcessor.cpp
+        source/effects/VocalEQ.cpp
+        source/presets/PresetManager.cpp
+        source/ui/components/CaravanLookAndFeel.cpp
+        source/ui/editor/CaravanEditor.cpp
 )
+
+# Include directories
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        include
+        source
 )
 
 set(JUCE_ENABLE_MODULE_SOURCE_GROUPING ON)
