@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.30)
 
 project(CaravanPlugin VERSION 0.1.0)
 
@@ -10,6 +10,7 @@ juce_add_plugin(Caravan
     PLUGIN_MANUFACTURER_CODE KKLS
     PLUGIN_CODE CRVN
     FORMATS VST3
+    COPY_PLUGIN_AFTER_BUILD FALSE
     PRODUCT_NAME "Caravan"
 )
 
@@ -46,6 +47,7 @@ set(PRESETS_FILES
 set(UI_COMPONENTS_FILES
     "${SOURCE_DIR}/ui/components/CaravanLookAndFeel.cpp"
     "${SOURCE_DIR}/ui/components/CaravanLookAndFeel.h"
+    "${SOURCE_DIR}/ui/components/CaravanFontManager.h"
 )
 
 set(UI_EDITOR_FILES
@@ -53,33 +55,10 @@ set(UI_EDITOR_FILES
     "${SOURCE_DIR}/ui/editor/CaravanEditor.h"
 )
 
+# OpenGL module
 set(UI_OPENGL_FILES
-    # Will be populated in Phase 2
+    "${SOURCE_DIR}/ui/opengl/CaravanOpenGLContext.h"
 )
-
-# Utils module
-set(UTILS_FILES
-    # Will be populated as needed
-)
-
-# Resource files - check if directories exist before using GLOB
-if(EXISTS "${RESOURCES_DIR}/shaders")
-    file(GLOB_RECURSE SHADER_FILES "${RESOURCES_DIR}/shaders/*.frag" "${RESOURCES_DIR}/shaders/*.vert")
-else()
-    set(SHADER_FILES "")
-endif()
-
-if(EXISTS "${RESOURCES_DIR}/textures")
-    file(GLOB TEXTURE_FILES "${RESOURCES_DIR}/textures/*.*")
-else()
-    set(TEXTURE_FILES "")
-endif()
-
-if(EXISTS "${RESOURCES_DIR}/fonts")
-    file(GLOB FONT_FILES "${RESOURCES_DIR}/fonts/*.*")
-else()
-    set(FONT_FILES "")
-endif()
 
 # Add all source files to the target
 target_sources(Caravan
@@ -90,7 +69,6 @@ target_sources(Caravan
         ${UI_COMPONENTS_FILES}
         ${UI_EDITOR_FILES}
         ${UI_OPENGL_FILES}
-        ${UTILS_FILES}
 )
 
 # Set up source groups for better organization in IDEs
@@ -100,10 +78,6 @@ source_group("Presets" FILES ${PRESETS_FILES})
 source_group("UI/Components" FILES ${UI_COMPONENTS_FILES})
 source_group("UI/Editor" FILES ${UI_EDITOR_FILES})
 source_group("UI/OpenGL" FILES ${UI_OPENGL_FILES})
-source_group("Utils" FILES ${UTILS_FILES})
-source_group("Resources/Shaders" FILES ${SHADER_FILES})
-source_group("Resources/Textures" FILES ${TEXTURE_FILES})
-source_group("Resources/Fonts" FILES ${FONT_FILES})
 
 # Include directories
 target_include_directories(Caravan
@@ -112,17 +86,26 @@ target_include_directories(Caravan
         ${RESOURCES_DIR}
 )
 
-# Bundle resources with the plugin only if we have resources
-if(SHADER_FILES OR TEXTURE_FILES OR FONT_FILES)
-    juce_add_binary_data(CaravanResources
-        SOURCES 
-            ${SHADER_FILES}
-            ${TEXTURE_FILES}
-            ${FONT_FILES}
-    )
-    
-    target_link_libraries(Caravan PRIVATE CaravanResources)
-endif()
+# Bundle resources with the plugin
+set(IMAGE_FILES 
+    "${RESOURCES_DIR}/images/background.png"
+    "${RESOURCES_DIR}/images/compass.png"
+)
+
+# Add font resources
+set(FONT_FILES
+    "${RESOURCES_DIR}/fonts/cabin.ttf"
+)
+
+# Bundle the image resources
+juce_add_binary_data(CaravanResources
+    SOURCES 
+        ${IMAGE_FILES}
+        ${FONT_FILES}
+)
+
+# Link with resources
+target_link_libraries(Caravan PRIVATE CaravanResources)
 
 # Enable module source grouping for JUCE modules
 set(JUCE_ENABLE_MODULE_SOURCE_GROUPING ON)
@@ -153,4 +136,7 @@ if(MSVC)
         PRIVATE 
             _CRT_SECURE_NO_WARNINGS
     )
+    
+    # Add debug information when in Debug configuration
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
 endif()

@@ -29,5 +29,9 @@ CPMAddPackage(
   SOURCE_DIR ${LIB_DIR}/juce
 )
 
+# Tell JUCE to enable OpenGL module
+set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON)
+option(JUCE_OPENGL_INCLUDE_MODERN_HEADERS "Include OpenGL headers needed for OpenGL 3.2 and above" ON)
+
 # Add the plugin directory
 add_subdirectory(plugin)
