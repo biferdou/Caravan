@@ -54,58 +54,36 @@ namespace Caravan
                                               float sliderPosProportional, float rotaryStartAngle,
                                               float rotaryEndAngle, juce::Slider &slider)
     {
-        if (slider.getName() == "Dust Drive")
+        // Special handling for Dust Drive main knob
+        if (slider.getName() == "Dust Drive" && compassImage.isValid())
         {
-            if (compassImage.isValid())
-            {
-                // Get the bounds of the knob area
-                auto bounds = juce::Rectangle<int>(x, y, width, height);
-                auto center = bounds.getCentre().toFloat();
+            auto bounds = juce::Rectangle<int>(x, y, width, height);
+            auto center = bounds.getCentre().toFloat();
+            float angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
+            float imageSize = juce::jmin(width, height) * 0.98f;
+            float originalWidth = static_cast<float>(compassImage.getWidth());
+            float originalHeight = static_cast<float>(compassImage.getHeight());
+            float scale = imageSize / juce::jmax(originalWidth, originalHeight);
 
-                // Calculate the angle based on value
-                float angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
+            // Create transformation to rotate image around center
+            juce::AffineTransform transform;
+            transform = juce::AffineTransform::translation(-originalWidth / 2.0f, -originalHeight / 2.0f)
+                            .rotated(angle)
+                            .scaled(scale, scale)
+                            .translated(center.x, center.y);
 
-                // For the larger knob, use nearly the full available space (98%)
-                float imageSize = juce::jmin(width, height) * 0.98f;
-
-                // Get original image dimensions
-                float originalWidth = static_cast<float>(compassImage.getWidth());
-                float originalHeight = static_cast<float>(compassImage.getHeight());
-
-                // Calculate scale factor to fit the image within our enlarged target size
-                float scale = imageSize / juce::jmax(originalWidth, originalHeight);
-
-                // Create transformation that rotates precisely around the center point
-                juce::AffineTransform transform;
-                transform = juce::AffineTransform::translation(-originalWidth / 2.0f, -originalHeight / 2.0f) // Move to origin
-                                .rotated(angle)                                                               // Rotate around origin
-                                .scaled(scale, scale)                                                         // Scale
-                                .translated(center.x, center.y);                                              // Move to final position
-
-                // Draw the rotated image
-                g.drawImageTransformed(compassImage, transform);
-
-                // Display value percentage with larger text for the bigger knob
-                int percentage = static_cast<int>(sliderPosProportional * 100.0f);
-                g.setFont(customFont.withHeight(imageSize * 0.10f)); // Adjusted text size
-                g.setColour(juce::Colours::white);
-                g.drawText(juce::String(percentage) + "%",
-                           bounds.reduced(static_cast<int>(imageSize * 0.4f)), // Keep text centered
-                           juce::Justification::centred, false);
-
-                return;
-            }
+            g.drawImageTransformed(compassImage, transform);
+            return;
         }
 
-        // Smaller knobs for secondary controls
+        // Standard knob drawing for secondary controls
         float knobSize = slider.getName() == "Dust Drive" ? 1.0f : 0.75f;
-
         auto bounds = juce::Rectangle<float>(static_cast<float>(x),
                                              static_cast<float>(y),
                                              static_cast<float>(width),
                                              static_cast<float>(height));
 
-        // For secondary knobs, adjust the size to make them smaller
+        // Resize for secondary knobs
         if (slider.getName() != "Dust Drive")
         {
             auto center = bounds.getCentre();
@@ -115,6 +93,7 @@ namespace Caravan
                                             newSize, newSize);
         }
 
+        // Draw knob base
         float radius = juce::jmin(bounds.getWidth(), bounds.getHeight()) * 0.4f;
         auto center = bounds.getCentre();
 
@@ -124,6 +103,7 @@ namespace Caravan
         g.setColour(juce::Colours::grey);
         g.drawEllipse(center.x - radius, center.y - radius, radius * 2.0f, radius * 2.0f, 1.5f);
 
+        // Draw value arc
         float angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
 
         g.setColour(slider.getName() == "Dust Drive" ? juce::Colours::orange : juce::Colours::orange.darker());
@@ -132,23 +112,13 @@ namespace Caravan
                    rotaryStartAngle, angle, true);
         g.strokePath(arc, juce::PathStrokeType(3.0f));
 
+        // Draw pointer
         juce::Path pointer;
         pointer.addRectangle(-1.5f, -radius, 3.0f, radius * 0.7f);
         pointer.applyTransform(juce::AffineTransform::rotation(angle).translated(center.x, center.y));
         g.setColour(juce::Colours::white);
         g.fillPath(pointer);
-
-        if (slider.getName() == "Dust Drive")
-        {
-            int percentage = static_cast<int>(sliderPosProportional * 100.0f);
-            g.setFont(customFont.withHeight(radius * 0.3f));
-            g.setColour(juce::Colours::white);
-            g.drawText(juce::String(percentage) + "%",
-                       juce::Rectangle<float>(center.x - radius, center.y - radius * 0.2f, radius * 2.0f, radius * 0.4f).toNearestInt(),
-                       juce::Justification::centred, false);
-        }
     }
-
     void CaravanLookAndFeel::drawToggleButton(juce::Graphics &g, juce::ToggleButton &button,
                                               bool shouldDrawButtonAsHighlighted,
                                               bool shouldDrawButtonAsDown)
