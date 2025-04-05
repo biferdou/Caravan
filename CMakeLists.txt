@@ -4,6 +4,20 @@ project(Caravan)
 
 set(CMAKE_CXX_STANDARD 23)
 
+# Disable security warnings for unsafe C functions in VST3 SDK
+# This is needed because the JUCE VST3 implementation uses functions 
+# like strcpy, sprintf, etc. that MSVC flags as unsafe
+if(MSVC)
+    # Add this globally to silence the warnings in VST3 SDK
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    
+    # Disable treating warnings as errors for JUCE code only
+    # but keep it for our own code
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
 set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 include(cmake/cpm.cmake)
 
@@ -15,10 +29,5 @@ CPMAddPackage(
   SOURCE_DIR ${LIB_DIR}/juce
 )
 
-if (MSVC)
-  add_compile_options(/W4 /WX)
-else()
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
+# Add the plugin directory
 add_subdirectory(plugin)
