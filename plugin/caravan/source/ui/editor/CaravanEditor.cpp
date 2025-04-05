@@ -32,7 +32,6 @@ namespace Caravan
         configureLabel(dustDriveLabel, "Dust Drive");
 
         addAndMakeVisible(dustDriveSlider);
-        addAndMakeVisible(dustDriveLabel);
         addAndMakeVisible(tuneModeButton);
         addAndMakeVisible(tuneModeLabel);
         addAndMakeVisible(widthSlider);
@@ -198,7 +197,7 @@ namespace Caravan
             carouselButtonWidth,
             carouselHeight);
 
-        versionLabel.setBounds(20, getHeight() - 30, 150, 25);
+        versionLabel.setBounds(10, getHeight() - 30, 150, 25);
     }
 
     void CaravanEditor::configureSlider(juce::Slider &slider, bool isMainDrive)
