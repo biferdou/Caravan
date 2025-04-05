@@ -1,11 +1,13 @@
 #pragma once
 #include "core/CaravanProcessor.h"
 #include "ui/components/CaravanLookAndFeel.h"
+#include "ui/components/CaravanFontManager.h"
+#include "ui/opengl/CaravanOpenGLContext.h"
 
 namespace Caravan
 {
-
-    class CaravanEditor : public juce::AudioProcessorEditor
+    class CaravanEditor : public juce::AudioProcessorEditor,
+                          private juce::Timer
     {
     public:
         explicit CaravanEditor(CaravanProcessor &);
@@ -14,14 +16,21 @@ namespace Caravan
         void paint(juce::Graphics &) override;
         void resized() override;
 
+        void timerCallback() override;
+
+        CaravanOpenGLContext *getOpenGLContext() { return openGLContext.get(); }
+
     private:
-        // UI Configuration helpers
         void configureSlider(juce::Slider &, bool isMainDrive = false);
         void configureLabel(juce::Label &, const juce::String &);
         void handlePresetChange();
         void setupPresetBox();
+        void updateParameters();
+        void updateAllParameters(); // Added this method for preset handling
+        void updateOpenGLParameters();
 
         CaravanProcessor &processor;
+        CaravanFontManager fontManager;
 
         // Main UI Components
         juce::Slider dustDriveSlider; // Main central knob
@@ -36,6 +45,10 @@ namespace Caravan
         juce::Label airLabel;
         juce::Label deEsserLabel;
 
+        // Title and version labels
+        juce::Label titleLabel;
+        juce::Label versionLabel;
+
         // Parameter attachments
         std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>> sliderAttachments;
         std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> tuneModeAttachment;
@@ -44,7 +57,10 @@ namespace Caravan
         std::unique_ptr<CaravanLookAndFeel> lookAndFeel;
         juce::ComboBox presetBox;
 
+        // OpenGL context for desert UI
+        std::unique_ptr<CaravanOpenGLContext> openGLContext;
+
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CaravanEditor)
     };
 
-} // namespace Caravan
+}
