@@ -59,10 +59,8 @@ namespace Caravan
 
         juce::ignoreUnused(widthValue);
 
-        // Set input/output gain to prevent clipping
-        // Adding a slight output gain compensation based on drive amount to maintain consistent levels
         inputGain.setGainLinear(0.8f);
-        outputGain.setGainLinear(0.9f - dustDriveValue * 0.1f); // Compensate for saturation gain
+        outputGain.setGainLinear(0.9f - dustDriveValue * 0.1f);
     }
 
     void CaravanProcessor::releaseResources() {}
@@ -118,7 +116,15 @@ namespace Caravan
             apvts.replaceState(juce::ValueTree::fromXml(*xmlState));
     }
 
-} // namespace Caravan
+    std::string CaravanProcessor::getPresetName(int index) const
+    {
+        if (presetManager)
+        {
+            return presetManager->getPresetName(index);
+        }
+        return "Default";
+    }
+}
 
 // Function to create the plugin instance
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()

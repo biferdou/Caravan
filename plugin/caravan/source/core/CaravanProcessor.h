@@ -9,7 +9,6 @@
 
 namespace Caravan
 {
-
     class CaravanProcessor : public juce::AudioProcessor
     {
     public:
@@ -39,8 +38,9 @@ namespace Caravan
 
         juce::AudioProcessorValueTreeState apvts;
 
-        // Public method to apply presets from the editor
+        // Public methods for preset management
         void applyPreset(int presetIndex);
+        std::string getPresetName(int index) const;
 
     private:
         // DSP modules
@@ -65,5 +65,4 @@ namespace Caravan
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CaravanProcessor)
     };
-
-} // namespace Caravan
+}
