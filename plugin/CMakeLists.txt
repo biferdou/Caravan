@@ -15,18 +15,20 @@ juce_add_plugin (${PROJECT_NAME}
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-        source/PluginProcessor.cpp
-        source/PluginEditor.cpp
+        source/CaravanProcessor.cpp
+        source/CaravanEditor.cpp
 )
-
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         include
 )
 
+set(JUCE_ENABLE_MODULE_SOURCE_GROUPING ON)
+
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE
         juce::juce_audio_utils
+        juce::juce_dsp
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
