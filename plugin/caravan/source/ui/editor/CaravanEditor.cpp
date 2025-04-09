@@ -27,8 +27,9 @@ namespace Caravan
         tuneModeButton.setButtonText("");
         tuneModeButton.setLookAndFeel(lookAndFeel.get());
         tuneModeButton.setColour(juce::ToggleButton::textColourId, juce::Colours::white);
+        tuneModeButton.setColour(juce::ToggleButton::tickColourId, juce::Colours::orange);
 
-        configureLabel(tuneModeLabel, "Tune Mode");
+        configureLabel(tuneModeLabel, "TUNE MODE");
         configureLabel(dustDriveLabel, "Dust Drive");
 
         addAndMakeVisible(dustDriveSlider);
@@ -42,16 +43,19 @@ namespace Caravan
         addAndMakeVisible(deEsserLabel);
 
         titleLabel.setText("CARAVAN", juce::dontSendNotification);
-        titleLabel.setFont(fontManager.getFont(48.0f));
+        titleLabel.setFont(fontManager.getFont(85.0f));
         titleLabel.setJustificationType(juce::Justification::centred);
         titleLabel.setColour(juce::Label::textColourId, juce::Colours::white);
         addAndMakeVisible(titleLabel);
 
         versionLabel.setText("alpha v1.0.1", juce::dontSendNotification);
-        versionLabel.setFont(fontManager.getFont(14.0f));
+        versionLabel.setFont(fontManager.getFont(24.0f));
         versionLabel.setJustificationType(juce::Justification::bottomLeft);
         versionLabel.setColour(juce::Label::textColourId, juce::Colours::white);
         addAndMakeVisible(versionLabel);
+
+        tuneModeLabel.setFont(fontManager.getFont(26.0f).boldened());
+        tuneModeLabel.setJustificationType(juce::Justification::centred);
 
         sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
             processor.apvts, "dustDrive", dustDriveSlider));
@@ -122,21 +126,26 @@ namespace Caravan
         dustDriveLabel.setBounds(dustDriveArea.getX(), dustDriveArea.getY() - 30, dustDriveSize, 25);
         dustDriveSlider.setBounds(dustDriveArea);
 
-        int buttonWidth = 80;
-        int buttonHeight = 30;
-        int tuneModeX = getWidth() - buttonWidth - 40;
+        int radioSize = 30;
+        int labelWidth = 150;
+        int spacing = 100;
 
-        tuneModeLabel.setBounds(
-            tuneModeX,
-            dustDriveArea.getCentreY() - buttonHeight / 2 - 25,
-            buttonWidth,
-            20);
+        int tuneModeX = dustDriveArea.getRight() + spacing;
+        int tuneModeY = dustDriveArea.getCentreY() - radioSize / 2;
 
+        // Position the radio button
         tuneModeButton.setBounds(
             tuneModeX,
-            dustDriveArea.getCentreY() - buttonHeight / 2,
-            buttonWidth,
-            buttonHeight);
+            tuneModeY,
+            radioSize,
+            radioSize);
+
+        // Position the label below the radio button, centered
+        tuneModeLabel.setBounds(
+            tuneModeX - labelWidth / 2 + radioSize / 2,
+            tuneModeY + radioSize + 10,
+            labelWidth,
+            30);
 
         int secondaryKnobSize = 80;
         int secondaryKnobY = dustDriveArea.getBottom() + 30;
@@ -221,7 +230,7 @@ namespace Caravan
     void CaravanEditor::configureLabel(juce::Label &label, const juce::String &text)
     {
         label.setText(text, juce::dontSendNotification);
-        label.setFont(fontManager.getFont(18.0f));
+        label.setFont(fontManager.getFont(28.0f));
         label.setJustificationType(juce::Justification::centred);
         label.setColour(juce::Label::textColourId, juce::Colours::white);
     }
@@ -229,7 +238,7 @@ namespace Caravan
     void CaravanEditor::setupPresetCarousel()
     {
         presetNameLabel.setText("Select Preset", juce::dontSendNotification);
-        presetNameLabel.setFont(fontManager.getFont(18.0f));
+        presetNameLabel.setFont(fontManager.getFont(28.0f).boldened());
         presetNameLabel.setJustificationType(juce::Justification::centred);
         presetNameLabel.setColour(juce::Label::textColourId, juce::Colours::white);
         addAndMakeVisible(presetNameLabel);

@@ -7,7 +7,6 @@ namespace Caravan
 
     CaravanLookAndFeel::CaravanLookAndFeel()
     {
-        // Initialize colors
         sandColor = juce::Colours::sandybrown;
         duneColor = juce::Colours::saddlebrown;
         skyColor = juce::Colours::skyblue;
@@ -15,33 +14,27 @@ namespace Caravan
         textColor = juce::Colours::white;
         shadowColor = juce::Colours::black.withAlpha(0.5f);
 
-        // Initialize default font
-        customFont = juce::Font(juce::FontOptions().withHeight(15.0f));
+        customFont = juce::Font(juce::FontOptions().withHeight(20.0f));
 
-        // Initialize colors
         setColour(juce::Slider::thumbColourId, juce::Colours::orange);
         setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::orange);
         setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::darkgrey);
         setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
         setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
 
-        // Toggle button colors
         setColour(juce::ToggleButton::tickColourId, juce::Colours::orange);
         setColour(juce::ToggleButton::tickDisabledColourId, juce::Colours::orange.withAlpha(0.5f));
         setColour(juce::ToggleButton::textColourId, juce::Colours::white);
 
-        // Combo box colors
         setColour(juce::ComboBox::backgroundColourId, juce::Colours::darkgrey);
         setColour(juce::ComboBox::textColourId, juce::Colours::white);
         setColour(juce::ComboBox::arrowColourId, juce::Colours::orange);
         setColour(juce::ComboBox::buttonColourId, juce::Colours::darkgrey.darker());
         setColour(juce::ComboBox::outlineColourId, juce::Colours::darkgrey.darker());
 
-        // Label colors
         setColour(juce::Label::textColourId, juce::Colours::white);
         setColour(juce::Label::outlineColourId, juce::Colours::transparentBlack);
 
-        // Load the compass image once at initialization
         compassImage = juce::ImageCache::getFromMemory(
             BinaryData::compass_png, BinaryData::compass_pngSize);
     }
@@ -54,7 +47,6 @@ namespace Caravan
                                               float sliderPosProportional, float rotaryStartAngle,
                                               float rotaryEndAngle, juce::Slider &slider)
     {
-        // Special handling for Dust Drive main knob
         if (slider.getName() == "Dust Drive" && compassImage.isValid())
         {
             auto bounds = juce::Rectangle<int>(x, y, width, height);
@@ -65,7 +57,6 @@ namespace Caravan
             float originalHeight = static_cast<float>(compassImage.getHeight());
             float scale = imageSize / juce::jmax(originalWidth, originalHeight);
 
-            // Create transformation to rotate image around center
             juce::AffineTransform transform;
             transform = juce::AffineTransform::translation(-originalWidth / 2.0f, -originalHeight / 2.0f)
                             .rotated(angle)
@@ -76,14 +67,12 @@ namespace Caravan
             return;
         }
 
-        // Standard knob drawing for secondary controls
         float knobSize = slider.getName() == "Dust Drive" ? 1.0f : 0.75f;
         auto bounds = juce::Rectangle<float>(static_cast<float>(x),
                                              static_cast<float>(y),
                                              static_cast<float>(width),
                                              static_cast<float>(height));
 
-        // Resize for secondary knobs
         if (slider.getName() != "Dust Drive")
         {
             auto center = bounds.getCentre();
@@ -93,7 +82,6 @@ namespace Caravan
                                             newSize, newSize);
         }
 
-        // Draw knob base
         float radius = juce::jmin(bounds.getWidth(), bounds.getHeight()) * 0.4f;
         auto center = bounds.getCentre();
 
@@ -103,7 +91,6 @@ namespace Caravan
         g.setColour(juce::Colours::grey);
         g.drawEllipse(center.x - radius, center.y - radius, radius * 2.0f, radius * 2.0f, 1.5f);
 
-        // Draw value arc
         float angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
 
         g.setColour(slider.getName() == "Dust Drive" ? juce::Colours::orange : juce::Colours::orange.darker());
@@ -112,13 +99,13 @@ namespace Caravan
                    rotaryStartAngle, angle, true);
         g.strokePath(arc, juce::PathStrokeType(3.0f));
 
-        // Draw pointer
         juce::Path pointer;
         pointer.addRectangle(-1.5f, -radius, 3.0f, radius * 0.7f);
         pointer.applyTransform(juce::AffineTransform::rotation(angle).translated(center.x, center.y));
         g.setColour(juce::Colours::white);
         g.fillPath(pointer);
     }
+
     void CaravanLookAndFeel::drawToggleButton(juce::Graphics &g, juce::ToggleButton &button,
                                               bool shouldDrawButtonAsHighlighted,
                                               bool shouldDrawButtonAsDown)
@@ -129,43 +116,30 @@ namespace Caravan
         bool isEnabled = button.isEnabled();
         float alpha = isEnabled ? 1.0f : 0.5f;
 
-        auto fontSize = juce::jmin(15.0f, static_cast<float>(button.getHeight()) * 0.6f);
-        auto tickWidth = fontSize * 1.1f;
+        auto buttonArea = button.getLocalBounds();
 
-        juce::Rectangle<float> tickBounds(4.0f, (static_cast<float>(button.getHeight()) - tickWidth) * 0.5f,
-                                          tickWidth, tickWidth);
+        // Radio button design - circular
+        const int radioSize = juce::jmin(buttonArea.getWidth(), buttonArea.getHeight() - 2);
+        const float radius = radioSize / 2.0f;
 
-        g.setColour(juce::Colours::darkgrey.withAlpha(alpha));
-        g.fillRoundedRectangle(tickBounds, 2.0f);
+        juce::Point<float> center(
+            static_cast<float>(buttonArea.getCentreX()),
+            static_cast<float>(buttonArea.getCentreY()));
 
-        g.setColour((shouldDrawButtonAsHighlighted ? juce::Colours::orange : juce::Colours::darkgrey.darker()).withAlpha(alpha));
-        g.drawRoundedRectangle(tickBounds, 2.0f, 1.5f);
+        // Draw outer circle
+        g.setColour(shouldDrawButtonAsHighlighted ? juce::Colours::white : juce::Colours::lightgrey);
+        g.drawEllipse(center.x - radius, center.y - radius, radius * 2.0f, radius * 2.0f, 1.5f);
 
+        // Draw background
+        g.setColour(isOn ? juce::Colours::orange.darker() : juce::Colours::darkgrey);
+        g.fillEllipse(center.x - radius + 1.5f, center.y - radius + 1.5f, (radius - 1.5f) * 2.0f, (radius - 1.5f) * 2.0f);
+
+        // Draw inner dot if toggled on
         if (isOn)
         {
-            g.setColour(juce::Colours::orange.withAlpha(alpha));
-            auto tick = tickBounds.reduced(3.0f);
-            g.fillEllipse(tick);
-
-            g.setFont(customFont.withHeight(fontSize));
-            g.setColour(juce::Colours::white.withAlpha(alpha));
-            g.drawText("ON",
-                       static_cast<int>(tickBounds.getRight() + 5.0f),
-                       static_cast<int>(tickBounds.getY()),
-                       static_cast<int>(button.getWidth() - tickBounds.getWidth() - 5.0f),
-                       static_cast<int>(tickBounds.getHeight()),
-                       juce::Justification::centredLeft, true);
-        }
-        else
-        {
-            g.setFont(customFont.withHeight(fontSize));
-            g.setColour(juce::Colours::white.withAlpha(0.8f * alpha));
-            g.drawText("OFF",
-                       static_cast<int>(tickBounds.getRight() + 5.0f),
-                       static_cast<int>(tickBounds.getY()),
-                       static_cast<int>(button.getWidth() - tickBounds.getWidth() - 5.0f),
-                       static_cast<int>(tickBounds.getHeight()),
-                       juce::Justification::centredLeft, true);
+            g.setColour(juce::Colours::white);
+            const float innerRadius = radius * 0.4f;
+            g.fillEllipse(center.x - innerRadius, center.y - innerRadius, innerRadius * 2.0f, innerRadius * 2.0f);
         }
     }
 
@@ -203,7 +177,7 @@ namespace Caravan
     void CaravanLookAndFeel::positionComboBoxText(juce::ComboBox &box, juce::Label &label)
     {
         label.setBounds(10, 1, box.getWidth() - box.getHeight() - 15, box.getHeight() - 2);
-        label.setFont(customFont.withHeight(static_cast<float>(box.getHeight()) * 0.6f));
+        label.setFont(juce::Font(juce::FontOptions().withHeight(static_cast<float>(box.getHeight()) * 0.7f)));
     }
 
     void CaravanLookAndFeel::drawLabel(juce::Graphics &g, juce::Label &label)

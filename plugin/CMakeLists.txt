@@ -94,7 +94,7 @@ set(IMAGE_FILES
 
 # Add font resources
 set(FONT_FILES
-    "${RESOURCES_DIR}/fonts/cabin.ttf"
+    "${RESOURCES_DIR}/fonts/changa.ttf"
 )
 
 # Bundle the image resources
