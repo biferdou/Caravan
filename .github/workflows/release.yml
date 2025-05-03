@@ -46,7 +46,7 @@ jobs:
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
+          name: caravan-windows-installer
           path: ${{github.workspace}}/build/*.exe
 
       - name: Upload to Release
@@ -89,7 +89,7 @@ jobs:
       - name: Upload macOS installer
         uses: actions/upload-artifact@v4
         with:
-          name: macos-installer
+          name: caravan-macos-installer
           path: ${{github.workspace}}/build/*.dmg
 
       - name: Upload to Release
@@ -97,47 +97,3 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{github.workspace}}/build/*.dmg
-
-  build-linux:
-    name: Build Linux Package
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build libasound2-dev libjack-jackd2-dev ladspa-sdk libcurl4-openssl-dev libfreetype6-dev libx11-dev libxcomposite-dev libxcursor-dev libxinerama-dev libxrandr-dev libxrender-dev libwebkit2gtk-6.0-dev libglu1-mesa-dev mesa-common-dev
-
-      - name: Create build directory
-        run: cmake -E make_directory ${{github.workspace}}/build
-
-      - name: Configure CMake
-        working-directory: ${{github.workspace}}/build
-        run: cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build project
-        working-directory: ${{github.workspace}}/build
-        run: cmake --build . --config Release
-
-      - name: Create installer
-        working-directory: ${{github.workspace}}/build
-        run: cpack -C Release -G DEB
-
-      - name: List artifacts
-        working-directory: ${{github.workspace}}/build
-        run: ls -la *.deb || echo "No DEB files found"
-
-      - name: Upload Linux package
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-package
-          path: ${{github.workspace}}/build/*.deb
-
-      - name: Upload to Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{github.workspace}}/build/*.deb
