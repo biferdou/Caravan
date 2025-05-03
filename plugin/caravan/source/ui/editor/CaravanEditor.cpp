@@ -12,6 +12,26 @@ namespace Caravan
         lookAndFeel = std::make_unique<CaravanLookAndFeel>();
         setLookAndFeel(lookAndFeel.get());
 
+        // Load all preset background images
+        presetBackgroundImages.push_back(juce::ImageCache::getFromMemory(BinaryData::oasis_png, BinaryData::oasis_pngSize));
+        presetBackgroundImages.push_back(juce::ImageCache::getFromMemory(BinaryData::sandstorm_png, BinaryData::sandstorm_pngSize));
+        presetBackgroundImages.push_back(juce::ImageCache::getFromMemory(BinaryData::mirage_png, BinaryData::mirage_pngSize));
+        presetBackgroundImages.push_back(juce::ImageCache::getFromMemory(BinaryData::dunes_png, BinaryData::dunes_pngSize));
+        presetBackgroundImages.push_back(juce::ImageCache::getFromMemory(BinaryData::sahara_png, BinaryData::sahara_pngSize));
+        presetBackgroundImages.push_back(juce::ImageCache::getFromMemory(BinaryData::sunset_png, BinaryData::sunset_pngSize));
+        presetBackgroundImages.push_back(juce::ImageCache::getFromMemory(BinaryData::pristine_png, BinaryData::pristine_pngSize));
+        presetBackgroundImages.push_back(juce::ImageCache::getFromMemory(BinaryData::nomad_png, BinaryData::nomad_pngSize));
+
+        // Define preset text colors
+        presetTextColors.push_back(juce::Colours::white);          // Oasis
+        presetTextColors.push_back(juce::Colours::grey);           // Sandstorm
+        presetTextColors.push_back(juce::Colours::bisque);         // Mirage
+        presetTextColors.push_back(juce::Colours::darkolivegreen); // Dunes
+        presetTextColors.push_back(juce::Colours::black);          // Sahara
+        presetTextColors.push_back(juce::Colours::goldenrod);      // Sunset
+        presetTextColors.push_back(juce::Colours::darkred);        // Pristine
+        presetTextColors.push_back(juce::Colours::blue);           // Nomad
+
         configureSlider(dustDriveSlider, true);
         dustDriveSlider.setName("Dust Drive");
 
@@ -43,18 +63,18 @@ namespace Caravan
         addAndMakeVisible(deEsserLabel);
 
         titleLabel.setText("CARAVAN", juce::dontSendNotification);
-        titleLabel.setFont(fontManager.getFont(85.0f));
+        titleLabel.setFont(fontManager.getFont(90.0f));
         titleLabel.setJustificationType(juce::Justification::centred);
         titleLabel.setColour(juce::Label::textColourId, juce::Colours::black);
         addAndMakeVisible(titleLabel);
 
         versionLabel.setText("alpha v1.0.1", juce::dontSendNotification);
-        versionLabel.setFont(fontManager.getFont(24.0f));
+        versionLabel.setFont(fontManager.getFont(30.0f));
         versionLabel.setJustificationType(juce::Justification::bottomLeft);
         versionLabel.setColour(juce::Label::textColourId, juce::Colours::black);
         addAndMakeVisible(versionLabel);
 
-        tuneModeLabel.setFont(fontManager.getFont(26.0f).boldened());
+        tuneModeLabel.setFont(fontManager.getFont(45.0f).boldened());
         tuneModeLabel.setJustificationType(juce::Justification::centred);
 
         sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
@@ -83,6 +103,9 @@ namespace Caravan
         setupPresetCarousel();
         openGLContext = std::make_unique<CaravanOpenGLContext>();
         startTimer(50);
+
+        // Apply initial text colors
+        updateTextColors();
     }
 
     CaravanEditor::~CaravanEditor()
@@ -92,17 +115,20 @@ namespace Caravan
 
     void CaravanEditor::paint(juce::Graphics &g)
     {
-        auto backgroundImage = juce::ImageCache::getFromMemory(
-            BinaryData::background_png, BinaryData::background_pngSize);
+        // Check if we have a valid preset background image
+        if (!presetBackgroundImages.empty() && currentPresetIndex >= 0 &&
+            currentPresetIndex < static_cast<int>(presetBackgroundImages.size()))
+        {
+            auto &backgroundImage = presetBackgroundImages[currentPresetIndex];
+            if (backgroundImage.isValid())
+            {
+                g.drawImageAt(backgroundImage, 0, 0);
+                return;
+            }
+        }
 
-        if (backgroundImage.isValid())
-        {
-            g.drawImageAt(backgroundImage, 0, 0);
-        }
-        else
-        {
-            g.fillAll(juce::Colour(0xFF1A1A1A));
-        }
+        // Fallback if no valid image
+        g.fillAll(juce::Colour(0xFF1A1A1A));
     }
 
     void CaravanEditor::resized()
@@ -271,6 +297,8 @@ namespace Caravan
         presetNameLabel.setText(presetName, juce::dontSendNotification);
 
         updateAllParameters();
+        updateTextColors();
+        repaint();
     }
 
     void CaravanEditor::updateParameters()
@@ -283,6 +311,32 @@ namespace Caravan
         bool tuneMode = processor.apvts.getRawParameterValue("tuneMode")->load() > 0.5f;
         tuneModeButton.setToggleState(tuneMode, juce::dontSendNotification);
         repaint();
+    }
+
+    void CaravanEditor::updateTextColors()
+    {
+        // Make sure we have valid preset text colors
+        if (currentPresetIndex >= 0 && currentPresetIndex < static_cast<int>(presetTextColors.size()))
+        {
+            juce::Colour textColor = presetTextColors[currentPresetIndex];
+
+            // Update all label text colors
+            titleLabel.setColour(juce::Label::textColourId, textColor);
+            versionLabel.setColour(juce::Label::textColourId, textColor);
+            dustDriveLabel.setColour(juce::Label::textColourId, textColor);
+            widthLabel.setColour(juce::Label::textColourId, textColor);
+            airLabel.setColour(juce::Label::textColourId, textColor);
+            deEsserLabel.setColour(juce::Label::textColourId, textColor);
+            tuneModeLabel.setColour(juce::Label::textColourId, textColor);
+            presetNameLabel.setColour(juce::Label::textColourId, textColor);
+
+            // Update button text colors
+            prevPresetButton.setColour(juce::TextButton::textColourOffId, textColor);
+            nextPresetButton.setColour(juce::TextButton::textColourOffId, textColor);
+
+            // Update toggle button colors
+            tuneModeButton.setColour(juce::ToggleButton::textColourId, textColor);
+        }
     }
 
     void CaravanEditor::timerCallback()

@@ -28,6 +28,7 @@ namespace Caravan
         void updateParameters();
         void updateAllParameters();
         void updateOpenGLParameters();
+        void updateTextColors();
 
         CaravanProcessor &processor;
         CaravanFontManager fontManager;
@@ -57,6 +58,12 @@ namespace Caravan
 
         std::unique_ptr<CaravanLookAndFeel> lookAndFeel;
         std::unique_ptr<CaravanOpenGLContext> openGLContext;
+
+        // New: vector to store preset background images
+        std::vector<juce::Image> presetBackgroundImages;
+
+        // New: store preset text colors
+        std::vector<juce::Colour> presetTextColors;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CaravanEditor)
     };
