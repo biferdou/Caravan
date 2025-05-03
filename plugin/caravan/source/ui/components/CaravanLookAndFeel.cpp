@@ -14,7 +14,7 @@ namespace Caravan
         textColor = juce::Colours::black;
         shadowColor = juce::Colours::black.withAlpha(0.5f);
 
-        customFont = juce::Font(juce::FontOptions().withHeight(20.0f));
+        customFont = juce::Font(juce::FontOptions().withHeight(30.0f));
 
         setColour(juce::Slider::thumbColourId, juce::Colours::orange);
         setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::orange);
@@ -40,7 +40,7 @@ namespace Caravan
 
         // Load the knob image
         knobImage = juce::ImageCache::getFromMemory(
-            BinaryData::knob_bmp, BinaryData::knob_bmpSize);
+            BinaryData::knob_png, BinaryData::knob_pngSize);
     }
 
     CaravanLookAndFeel::~CaravanLookAndFeel()

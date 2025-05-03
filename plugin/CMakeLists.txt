@@ -89,6 +89,7 @@ target_include_directories(Caravan
 # Bundle resources with the plugin
 set(IMAGE_FILES 
     "${RESOURCES_DIR}/images/knob.bmp"
+    "${RESOURCES_DIR}/images/knob.png"
     "${RESOURCES_DIR}/images/background.png"
     "${RESOURCES_DIR}/images/compass.png"
     "${RESOURCES_DIR}/images/dunes.png"
