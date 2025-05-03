@@ -26,7 +26,7 @@ namespace Caravan
 
         tuneModeButton.setButtonText("");
         tuneModeButton.setLookAndFeel(lookAndFeel.get());
-        tuneModeButton.setColour(juce::ToggleButton::textColourId, juce::Colours::white);
+        tuneModeButton.setColour(juce::ToggleButton::textColourId, juce::Colours::black);
         tuneModeButton.setColour(juce::ToggleButton::tickColourId, juce::Colours::orange);
 
         configureLabel(tuneModeLabel, "TUNE MODE");
@@ -45,13 +45,13 @@ namespace Caravan
         titleLabel.setText("CARAVAN", juce::dontSendNotification);
         titleLabel.setFont(fontManager.getFont(85.0f));
         titleLabel.setJustificationType(juce::Justification::centred);
-        titleLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+        titleLabel.setColour(juce::Label::textColourId, juce::Colours::black);
         addAndMakeVisible(titleLabel);
 
         versionLabel.setText("alpha v1.0.1", juce::dontSendNotification);
         versionLabel.setFont(fontManager.getFont(24.0f));
         versionLabel.setJustificationType(juce::Justification::bottomLeft);
-        versionLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+        versionLabel.setColour(juce::Label::textColourId, juce::Colours::black);
         addAndMakeVisible(versionLabel);
 
         tuneModeLabel.setFont(fontManager.getFont(26.0f).boldened());
@@ -232,7 +232,7 @@ namespace Caravan
         label.setText(text, juce::dontSendNotification);
         label.setFont(fontManager.getFont(28.0f));
         label.setJustificationType(juce::Justification::centred);
-        label.setColour(juce::Label::textColourId, juce::Colours::white);
+        label.setColour(juce::Label::textColourId, juce::Colours::black);
     }
 
     void CaravanEditor::setupPresetCarousel()
@@ -240,13 +240,13 @@ namespace Caravan
         presetNameLabel.setText("Select Preset", juce::dontSendNotification);
         presetNameLabel.setFont(fontManager.getFont(28.0f).boldened());
         presetNameLabel.setJustificationType(juce::Justification::centred);
-        presetNameLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+        presetNameLabel.setColour(juce::Label::textColourId, juce::Colours::black);
         addAndMakeVisible(presetNameLabel);
 
         prevPresetButton.setButtonText("<");
         prevPresetButton.setColour(juce::TextButton::buttonColourId, juce::Colours::darkgrey);
         prevPresetButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::orange.darker());
-        prevPresetButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+        prevPresetButton.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
         prevPresetButton.onClick = [this]()
         { cyclePreset(-1); };
         addAndMakeVisible(prevPresetButton);
@@ -254,7 +254,7 @@ namespace Caravan
         nextPresetButton.setButtonText(">");
         nextPresetButton.setColour(juce::TextButton::buttonColourId, juce::Colours::darkgrey);
         nextPresetButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::orange.darker());
-        nextPresetButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+        nextPresetButton.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
         nextPresetButton.onClick = [this]()
         { cyclePreset(1); };
         addAndMakeVisible(nextPresetButton);

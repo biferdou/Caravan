@@ -11,7 +11,7 @@ namespace Caravan
         duneColor = juce::Colours::saddlebrown;
         skyColor = juce::Colours::skyblue;
         sunColor = juce::Colours::orange;
-        textColor = juce::Colours::white;
+        textColor = juce::Colours::black;
         shadowColor = juce::Colours::black.withAlpha(0.5f);
 
         customFont = juce::Font(juce::FontOptions().withHeight(20.0f));
@@ -19,20 +19,20 @@ namespace Caravan
         setColour(juce::Slider::thumbColourId, juce::Colours::orange);
         setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::orange);
         setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::darkgrey);
-        setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
+        setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
         setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
 
         setColour(juce::ToggleButton::tickColourId, juce::Colours::orange);
         setColour(juce::ToggleButton::tickDisabledColourId, juce::Colours::orange.withAlpha(0.5f));
-        setColour(juce::ToggleButton::textColourId, juce::Colours::white);
+        setColour(juce::ToggleButton::textColourId, juce::Colours::black);
 
         setColour(juce::ComboBox::backgroundColourId, juce::Colours::darkgrey);
-        setColour(juce::ComboBox::textColourId, juce::Colours::white);
+        setColour(juce::ComboBox::textColourId, juce::Colours::black);
         setColour(juce::ComboBox::arrowColourId, juce::Colours::orange);
         setColour(juce::ComboBox::buttonColourId, juce::Colours::darkgrey.darker());
         setColour(juce::ComboBox::outlineColourId, juce::Colours::darkgrey.darker());
 
-        setColour(juce::Label::textColourId, juce::Colours::white);
+        setColour(juce::Label::textColourId, juce::Colours::black);
         setColour(juce::Label::outlineColourId, juce::Colours::transparentBlack);
 
         compassImage = juce::ImageCache::getFromMemory(
@@ -102,7 +102,7 @@ namespace Caravan
         juce::Path pointer;
         pointer.addRectangle(-1.5f, -radius, 3.0f, radius * 0.7f);
         pointer.applyTransform(juce::AffineTransform::rotation(angle).translated(center.x, center.y));
-        g.setColour(juce::Colours::white);
+        g.setColour(juce::Colours::black);
         g.fillPath(pointer);
     }
 
@@ -113,8 +113,6 @@ namespace Caravan
         juce::ignoreUnused(shouldDrawButtonAsDown);
 
         bool isOn = button.getToggleState();
-        bool isEnabled = button.isEnabled();
-        float alpha = isEnabled ? 1.0f : 0.5f;
 
         auto buttonArea = button.getLocalBounds();
 
@@ -127,7 +125,7 @@ namespace Caravan
             static_cast<float>(buttonArea.getCentreY()));
 
         // Draw outer circle
-        g.setColour(shouldDrawButtonAsHighlighted ? juce::Colours::white : juce::Colours::lightgrey);
+        g.setColour(shouldDrawButtonAsHighlighted ? juce::Colours::black : juce::Colours::lightgrey);
         g.drawEllipse(center.x - radius, center.y - radius, radius * 2.0f, radius * 2.0f, 1.5f);
 
         // Draw background
@@ -137,7 +135,7 @@ namespace Caravan
         // Draw inner dot if toggled on
         if (isOn)
         {
-            g.setColour(juce::Colours::white);
+            g.setColour(juce::Colours::black);
             const float innerRadius = radius * 0.4f;
             g.fillEllipse(center.x - innerRadius, center.y - innerRadius, innerRadius * 2.0f, innerRadius * 2.0f);
         }
