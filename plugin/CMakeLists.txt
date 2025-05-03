@@ -88,7 +88,6 @@ target_include_directories(Caravan
 
 # Bundle resources with the plugin
 set(IMAGE_FILES 
-    "${RESOURCES_DIR}/images/knob.bmp"
     "${RESOURCES_DIR}/images/knob.png"
     "${RESOURCES_DIR}/images/background.png"
     "${RESOURCES_DIR}/images/compass.png"
@@ -156,7 +155,6 @@ include(InstallRequiredSystemLibraries)
 
 # Set path to LICENSE file
 set(LICENSE_FILE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
-set(PACKAGE_ICON "${CMAKE_SOURCE_DIR}/plugin/caravan/resources/images\\\\knob.bmp")
 
 # Set package metadata
 set(CPACK_PACKAGE_NAME "Caravan")
@@ -198,7 +196,6 @@ elseif(APPLE)
     
     # Additional macOS-specific properties
     set(CPACK_BUNDLE_NAME "Caravan")
-    set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/plugin/caravan/resources/images/knob.png")
     set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/plugin/Info.plist")
 
 # Linux-specific settings
