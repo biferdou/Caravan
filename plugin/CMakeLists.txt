@@ -183,6 +183,35 @@ if(WIN32)
     # Windows paths for VST3 plugins
     set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64\\\\Common Files\\\\VST3")
     set(VST3_INSTALL_DIR "")
+    
+# macOS-specific settings
+elseif(APPLE)
+    # macOS bundle settings
+    set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_DMG_VOLUME_NAME "Caravan")
+    set(CPACK_DMG_FORMAT "UDZO")
+    set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/plugin/caravan/resources/images/background.png")
+    set(CPACK_SYSTEM_NAME "macOS")
+    
+    # The macOS install path
+    set(VST3_INSTALL_DIR "Library/Audio/Plug-Ins/VST3")
+    
+    # Additional macOS-specific properties
+    set(CPACK_BUNDLE_NAME "Caravan")
+    set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/plugin/caravan/resources/images/knob.png")
+    set(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/plugin/Info.plist")
+
+# Linux-specific settings
+elseif(UNIX AND NOT APPLE)
+    # Linux settings
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "KradKradLabs <void@kradkradlabs.com>")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "sound")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libasound2, libjack0")
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Caravan - Vocal processing plugin for music production")
+    
+    # The Linux install path
+    set(VST3_INSTALL_DIR "usr/local/lib/vst3")
 endif()
 
 # Ensure proper file installation for all platforms
