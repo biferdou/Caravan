@@ -14,6 +14,8 @@ jobs:
   build-windows:
     name: Build Windows Installer
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -37,6 +39,10 @@ jobs:
         working-directory: ${{github.workspace}}/build
         run: cpack -C Release -G NSIS
 
+      - name: List artifacts
+        working-directory: ${{github.workspace}}/build
+        run: dir *.exe
+
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
@@ -48,12 +54,12 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{github.workspace}}/build/*.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
     name: Build macOS Installer
     runs-on: macos-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -76,6 +82,10 @@ jobs:
         working-directory: ${{github.workspace}}/build
         run: cpack -C Release -G DragNDrop
 
+      - name: List artifacts
+        working-directory: ${{github.workspace}}/build
+        run: ls -la *.dmg || echo "No DMG files found"
+
       - name: Upload macOS installer
         uses: actions/upload-artifact@v4
         with:
@@ -87,19 +97,19 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{github.workspace}}/build/*.dmg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-linux:
     name: Build Linux Package
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build libasound2-dev libjack-jackd2-dev ladspa-sdk libcurl4-openssl-dev libfreetype6-dev libx11-dev libxcomposite-dev libxcursor-dev libxinerama-dev libxrandr-dev libxrender-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev mesa-common-dev
+          sudo apt-get install -y build-essential cmake ninja-build libasound2-dev libjack-jackd2-dev ladspa-sdk libcurl4-openssl-dev libfreetype6-dev libx11-dev libxcomposite-dev libxcursor-dev libxinerama-dev libxrandr-dev libxrender-dev libwebkit2gtk-6.0-dev libglu1-mesa-dev mesa-common-dev
 
       - name: Create build directory
         run: cmake -E make_directory ${{github.workspace}}/build
@@ -116,6 +126,10 @@ jobs:
         working-directory: ${{github.workspace}}/build
         run: cpack -C Release -G DEB
 
+      - name: List artifacts
+        working-directory: ${{github.workspace}}/build
+        run: ls -la *.deb || echo "No DEB files found"
+
       - name: Upload Linux package
         uses: actions/upload-artifact@v4
         with:
@@ -127,5 +141,3 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{github.workspace}}/build/*.deb
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
