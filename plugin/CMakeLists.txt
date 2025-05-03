@@ -140,3 +140,53 @@ if(MSVC)
     # Add debug information when in Debug configuration
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
 endif()
+
+# Installer Configuration
+include(InstallRequiredSystemLibraries)
+
+# Set path to LICENSE file
+set(LICENSE_FILE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
+set(PACKAGE_ICON "${CMAKE_SOURCE_DIR}/plugin/caravan/resources/images\\\\icon.bmp")
+
+# Set package metadata
+set(CPACK_PACKAGE_NAME "Caravan")
+set(CPACK_PACKAGE_VENDOR "KradKradLabs")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Caravan - Vocal processing plugin")
+set(CPACK_PACKAGE_VERSION "0.1.0")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_RESOURCE_FILE_LICENSE "${LICENSE_FILE}")
+set(CPACK_PACKAGE_ICON "${PACKAGE_ICON}")
+
+# Platform-specific settings
+if(WIN32)
+    # Windows/NSIS specific settings
+    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_NSIS_PACKAGE_NAME "Caravan")
+    set(CPACK_NSIS_DISPLAY_NAME "Caravan VST3")
+    set(CPACK_NSIS_CONTACT "void@kradkradlabs.com")
+    set(CPACK_NSIS_MODIFY_PATH OFF)
+    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+    set(CPACK_NSIS_MUI_FINISHPAGE_RUN "Caravan.vst3")
+    
+    # Windows paths for VST3 plugins
+    set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64\\\\Common Files\\\\VST3")
+    set(VST3_INSTALL_DIR "")
+endif()
+
+# Ensure proper file installation for all platforms
+install(
+    DIRECTORY "${CMAKE_BINARY_DIR}/plugin/Caravan_artefacts/$<CONFIG>/VST3/Caravan.vst3/"
+    DESTINATION "Caravan.vst3"
+    COMPONENT VST3
+)
+
+# Define components
+set(CPACK_COMPONENTS_ALL VST3)
+set(CPACK_COMPONENT_VST3_DISPLAY_NAME "Caravan VST3 Plugin")
+set(CPACK_COMPONENT_VST3_DESCRIPTION "VST3 version of the Caravan plugin")
+set(CPACK_COMPONENT_VST3_REQUIRED TRUE)
+
+# Include CPack at the end
+include(CPack)
