@@ -146,7 +146,7 @@ include(InstallRequiredSystemLibraries)
 
 # Set path to LICENSE file
 set(LICENSE_FILE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
-set(PACKAGE_ICON "${CMAKE_SOURCE_DIR}/plugin/caravan/resources/images\\\\icon.bmp")
+set(PACKAGE_ICON "${CMAKE_SOURCE_DIR}/plugin/caravan/resources/images\\\\knob.bmp")
 
 # Set package metadata
 set(CPACK_PACKAGE_NAME "Caravan")
