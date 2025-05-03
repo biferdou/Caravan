@@ -1,125 +1,192 @@
-# Caravan
+# Caravan Audio Plugin
 
-![Caravan](plugin/caravan/resources/images/background.png)
+Caravan is a vocal processing audio plugin built using the JUCE framework. It features a unique "Dust Drive" saturation algorithm, vocal EQ with tune mode, stereo width enhancement, and preset management capabilities, all wrapped in a custom desert-themed UI.
 
-Caravan is a vocal processing audio plugin designed for modern productions, combining gentle saturation, vocal EQ, stereo enhancement, and presence control in an intuitive desert-themed interface.
+## Project Architecture
 
-## Features
+The project is organized into several core modules:
 
-- **Dust Drive**: A custom saturation algorithm designed specifically for vocal processing, providing warm harmonic distortion that preserves clarity
-- **Tune Mode**: Optimized EQ curve for vocals that will be processed with Auto-Tune or pitch correction
-- **Width Control**: Mid-side stereo width enhancement with intelligent frequency-dependent processing
-- **Air**: Presence and high-frequency enhancement for vocal clarity and brightness
-- **De-Esser**: Smooth sibilance reduction for natural-sounding vocals
-- **Preset System**: 8 carefully crafted presets designed for different vocal styles
+### Core Components
 
-## Requirements
+- **CaravanProcessor**: The main audio processing class that handles parameter management, audio processing, and orchestrates the different DSP modules. It inherits from JUCE's AudioProcessor class and manages parameter connections through AudioProcessorValueTreeState.
 
-- Windows 10/11 or macOS 10.13+
-- VST3-compatible DAW
-- C++23-compatible compiler for building from source
+- **AudioParameters**: Defines the plugin parameters and their ranges. Creates the parameter layout used by the processor and provides utility functions to map normalized parameter values (0-1) to appropriate ranges for DSP processing.
 
-## Building from Source
+### Effects Chain
 
-Caravan uses CMake as its build system:
+The audio processing chain consists of the following components in order:
 
-```bash
-# Clone the repository
-git clone https://github.com/KradKradLabs/Caravan.git
-cd Caravan
+1. **Input Gain**: Initial gain staging
+2. **VocalEQ**: EQ processing with tune mode option
+3. **DustDriveSaturator**: The main saturation effect
+4. **StereoWidthProcessor**: Stereo image enhancement
+5. **Output Gain**: Final gain staging
 
-# Create build directory
-mkdir build
-cd build
+#### DustDriveSaturator
 
-# Configure and build
-cmake ..
-cmake --build .
+The signature effect of the plugin, providing asymmetric saturation tailored for vocal processing. It uses different saturation curves for positive and negative signal peaks, with multi-stage processing for higher drive settings.
+
+#### VocalEQ
+
+Handles frequency-specific processing with two modes:
+
+- **Tune Mode**: Optimized for trap/hip-hop vocals with AutoTune, featuring higher low-cut, presence boost, and de-essing
+- **Standard Mode**: More transparent EQ with gentler settings
+
+#### StereoWidthProcessor
+
+Enhances stereo imaging using mid-side processing with subtle saturation applied to the side signal for a more cohesive stereo image.
+
+### Preset Management
+
+The PresetManager handles factory presets with desert-themed names like "Oasis," "Sandstorm," and "Mirage." Each preset stores unique settings for dust drive, tune mode, width, air, and de-essing parameters.
+
+### User Interface
+
+The UI is built around a custom desert theme with a main "Dust Drive" knob as the central component. The editor includes:
+
+- Main compass-styled Dust Drive control
+- Tune Mode button
+- Secondary controls for Width, Air, and De-Esser
+- Preset carousel for switching between factory presets
+
+The CaravanLookAndFeel class provides custom styling for UI elements with a desert color palette of sand, dune, sky, and sun colors. It includes custom rendering for rotary sliders, toggle buttons, combo boxes, and labels.
+
+## Project Structure
+
+```txt
+Caravan/
+├── CMakeLists.txt           # Root CMake configuration
+├── cmake/
+│   └── cpm.cmake            # CPM package manager integration
+├── libs/
+│   └── juce/                # JUCE library (downloaded by CPM)
+└── plugin/
+    ├── CMakeLists.txt       # Plugin-specific CMake configuration
+    └── caravan/
+        ├── source/
+        │   ├── core/
+        │   │   ├── AudioParameters.cpp/h
+        │   │   └── CaravanProcessor.cpp/h
+        │   ├── effects/
+        │   │   ├── DustDriveSaturator.cpp/h
+        │   │   ├── StereoWidthProcessor.cpp/h
+        │   │   └── VocalEQ.cpp/h
+        │   ├── presets/
+        │   │   └── PresetManager.cpp/h
+        │   └── ui/
+        │       ├── components/
+        │       │   ├── CaravanLookAndFeel.cpp/h
+        │       │   └── CaravanFontManager.h
+        │       ├── editor/
+        │       │   └── CaravanEditor.cpp/h
+        │       └── opengl/
+        │           └── CaravanOpenGLContext.h
+        └── resources/
+            ├── images/
+            │   ├── background.png
+            │   └── compass.png
+            └── fonts/
+                └── changa.ttf
 ```
 
-### Dependencies
+## Setup and Building
 
-- JUCE 8.0.6 (automatically fetched via CPM)
-- OpenGL (for UI rendering)
+### Prerequisites
 
-## Parameter Guide
+- CMake 3.30 or higher
+- C++23 compatible compiler
+- Git (for downloading JUCE via CPM)
 
-### Dust Drive
+### Building the Project
 
-The main processing control that adds saturation and harmonic character to vocals. Inspired by classic analog equipment with modern sensibilities.
+1. **Clone the repository**
 
-- Low settings (0-0.3): Subtle warmth and gentle saturation
-- Medium settings (0.3-0.7): Balanced harmonics and color
-- High settings (0.7-1.0): Aggressive saturation with multi-stage processing
+   ```bash
+   git clone https://github.com/yourusername/Caravan.git
+   cd Caravan
+   ```
 
-### Tune Mode
+2. **Create a build directory**
 
-When enabled, applies an optimized EQ curve that helps vocals sit better with Auto-Tune or other pitch correction:
+   ```bash
+   mkdir build
+   cd build
+   ```
 
-- Removes low-frequency content that can cause pitch correction artifacts
-- Enhances mid-range clarity for better pitch tracking
-- Smooths sibilance for more natural-sounding pitch correction
+3. **Configure with CMake**
 
-### Width
+   ```bash
+   cmake ..
+   ```
 
-Controls the stereo width enhancement using advanced mid-side processing techniques:
+4. **Build the project**
 
-- At 0.0: No width enhancement
-- At 0.5: Balanced stereo enhancement
-- At 1.0: Maximum stereo width
+   ```bash
+   cmake --build .
+   ```
 
-### Air
+On Windows with Visual Studio, you may want to specify the build configuration:
 
-Adds presence and high-frequency enhancement for vocal clarity:
+   ```bash
+   cmake --build . --config Release
+   ```
 
-- At 0.0: No air enhancement
-- At 0.5: Moderate air and presence
-- At 1.0: Maximum brightness and air
+### Plugin Output Location
 
-### De-Esser
+After building, the VST3 plugin will be located in:
 
-Controls the amount of sibilance reduction:
+- **Windows**: `build/plugin/Caravan_artefacts/VST3/Caravan.vst3`
+- **macOS**: `build/plugin/Caravan_artefacts/VST3/Caravan.vst3`
+- **Linux**: `build/plugin/Caravan_artefacts/VST3/Caravan.vst3`
 
-- At 0.0: No de-essing
-- At 0.5: Moderate sibilance reduction
-- At 1.0: Maximum de-essing
+## Development Notes
 
-## Presets
+### JUCE Integration
 
-Caravan includes 8 carefully crafted presets:
+- The project uses CPM (CMake Package Manager) to download and integrate JUCE version 8.0.6
+- OpenGL is enabled for potential UI enhancements (though currently minimally implemented)
+- Warning levels are set high, with platform-specific compiler options:
+  - MSVC: `/W4` and `_CRT_SECURE_NO_WARNINGS` definition
+  - GCC/Clang: `-Wall -Wextra -Wpedantic`
 
-1. **Oasis**: Characterized by moderate saturation, strong presence, and subtle width
-2. **Sandstorm**: More aggressive saturation, wide stereo image, less de-essing
-3. **Mirage**: Medium saturation, controlled width, balanced air
-4. **Dunes**: Heavy saturation, moderate width, emphasized air
-5. **Sahara**: Medium saturation, widest stereo, spacious air
-6. **Sunset**: Cleanest saturation, balanced width, strong air and presence
-7. **Pristine**: Minimal saturation, natural width, gentle presence enhancement
-8. **Nomad**: No saturation, minimal processing, just subtle enhancement
+### Plugin Configuration
 
-## UI Overview
+The plugin is configured as a VST3 effect with:
 
-The Caravan interface features a desert-themed design with:
+- Manufacturer: KradKradLabs
+- Manufacturer code: KKLS
+- Plugin code: CRVN
+- Product name: Caravan
+- Version: 0.1.0
 
-- A large central "Dust Drive" knob that controls the primary saturation effect
-- Secondary controls for Width, Air, and De-Esser
-- A toggle switch for Tune Mode
-- A preset carousel to quickly access different vocal processing flavors
+### Adding New Parameters
 
-## License
+To add new parameters to the plugin:
 
-© 2025 KradKradLabs. All rights reserved.
+1. Modify `AudioParameters.cpp` to add the parameter to the parameter layout.
+2. Add corresponding getter methods if needed.
+3. Add the parameter pointer in `CaravanProcessor.h`.
+4. Initialize the pointer in the `CaravanProcessor` constructor.
+5. Update the `updateProcessorSettings()` method to handle the new parameter.
+6. Add UI controls in the `CaravanEditor` class.
 
-## Credits
+### Creating New Presets
 
-- Developed by KradKradLabs
-- Uses the JUCE framework for audio processing and UI
-- Special thanks to the modern vocal production community for inspiration and testing
+To add new presets:
 
-## Future Roadmap
+1. Modify the `initializePresets()` method in `PresetManager.cpp`.
+2. Add new entries to the `desertPresets` vector with appropriate names and parameter values.
+3. Ensure the preset carousel in `CaravanEditor` is updated if needed to reflect the new total number of presets.
 
-- AAX and AU plugin format support
-- Additional vocal processing modules
-- MIDI control mapping
-- A/B comparison feature
-- Expanded preset library
+## Future Development Considerations
+
+- Expand the OpenGL integration for more dynamic visualizations
+- Add A/B comparison functionality
+- Implement user preset saving/loading
+- Add more processing algorithms (compressor, reverb, etc.)
+- Expand available plugin formats (AU, AAX)
+
+---
+
+Caravan is developed by KradKradLabs and is currently in alpha (v1.0.1)
