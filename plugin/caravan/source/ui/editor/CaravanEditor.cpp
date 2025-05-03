@@ -23,14 +23,14 @@ namespace Caravan
         presetBackgroundImages.push_back(juce::ImageCache::getFromMemory(BinaryData::nomad_png, BinaryData::nomad_pngSize));
 
         // Define preset text colors
-        presetTextColors.push_back(juce::Colours::white);      // Oasis
-        presetTextColors.push_back(juce::Colours::black);      // Sandstorm
-        presetTextColors.push_back(juce::Colours::darkkhaki);  // Mirage
-        presetTextColors.push_back(juce::Colours::black);      // Dunes
-        presetTextColors.push_back(juce::Colours::dodgerblue); // Sahara
-        presetTextColors.push_back(juce::Colours::gainsboro);  // Sunset
-        presetTextColors.push_back(juce::Colours::darkred);    // Pristine
-        presetTextColors.push_back(juce::Colours::blue);       // Nomad
+        presetTextColors.push_back(juce::Colours::white);         // Oasis
+        presetTextColors.push_back(juce::Colours::black);         // Sandstorm
+        presetTextColors.push_back(juce::Colours::darkred);       // Mirage
+        presetTextColors.push_back(juce::Colours::red);           // Dunes
+        presetTextColors.push_back(juce::Colours::darkslateblue); // Sahara
+        presetTextColors.push_back(juce::Colours::darkturquoise); // Sunset
+        presetTextColors.push_back(juce::Colours::black);         // Pristine
+        presetTextColors.push_back(juce::Colours::blue);          // Nomad
 
         configureSlider(dustDriveSlider, true);
         dustDriveSlider.setName("Dust Drive");
@@ -69,12 +69,12 @@ namespace Caravan
         addAndMakeVisible(titleLabel);
 
         versionLabel.setText("alpha v1.0.1", juce::dontSendNotification);
-        versionLabel.setFont(fontManager.getFont(35.0f));
+        versionLabel.setFont(fontManager.getFont(33.0f));
         versionLabel.setJustificationType(juce::Justification::bottomLeft);
         versionLabel.setColour(juce::Label::textColourId, juce::Colours::black);
         addAndMakeVisible(versionLabel);
 
-        tuneModeLabel.setFont(fontManager.getFont(40.0f).boldened());
+        tuneModeLabel.setFont(fontManager.getFont(45.0f));
         tuneModeLabel.setJustificationType(juce::Justification::centred);
 
         sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
