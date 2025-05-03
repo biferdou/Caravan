@@ -54,8 +54,9 @@ namespace Caravan
         juce::Colour shadowColor; // Shadow color
 
         juce::Image compassImage;        // Compass rose for main knob
+        juce::Image knobImage;           // Small knob image
         juce::Image dialBackgroundImage; // Background for knobs
         juce::Font customFont;           // Custom font for text elements
     };
 
-} // namespace Caravan
+}

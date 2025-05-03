@@ -37,6 +37,10 @@ namespace Caravan
 
         compassImage = juce::ImageCache::getFromMemory(
             BinaryData::compass_png, BinaryData::compass_pngSize);
+
+        // Load the knob image
+        knobImage = juce::ImageCache::getFromMemory(
+            BinaryData::knob_bmp, BinaryData::knob_bmpSize);
     }
 
     CaravanLookAndFeel::~CaravanLookAndFeel()
@@ -47,6 +51,7 @@ namespace Caravan
                                               float sliderPosProportional, float rotaryStartAngle,
                                               float rotaryEndAngle, juce::Slider &slider)
     {
+        // For the main Dust Drive knob, use the compass image
         if (slider.getName() == "Dust Drive" && compassImage.isValid())
         {
             auto bounds = juce::Rectangle<int>(x, y, width, height);
@@ -66,7 +71,28 @@ namespace Caravan
             g.drawImageTransformed(compassImage, transform);
             return;
         }
+        // For secondary sliders, use the knob image
+        else if (knobImage.isValid())
+        {
+            auto bounds = juce::Rectangle<int>(x, y, width, height);
+            auto center = bounds.getCentre().toFloat();
+            float angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
+            float imageSize = juce::jmin(width, height) * 0.9f;
+            float originalWidth = static_cast<float>(knobImage.getWidth());
+            float originalHeight = static_cast<float>(knobImage.getHeight());
+            float scale = imageSize / juce::jmax(originalWidth, originalHeight);
 
+            juce::AffineTransform transform;
+            transform = juce::AffineTransform::translation(-originalWidth / 2.0f, -originalHeight / 2.0f)
+                            .rotated(angle)
+                            .scaled(scale, scale)
+                            .translated(center.x, center.y);
+
+            g.drawImageTransformed(knobImage, transform);
+            return;
+        }
+
+        // Fallback if images not available
         float knobSize = slider.getName() == "Dust Drive" ? 1.0f : 0.75f;
         auto bounds = juce::Rectangle<float>(static_cast<float>(x),
                                              static_cast<float>(y),
